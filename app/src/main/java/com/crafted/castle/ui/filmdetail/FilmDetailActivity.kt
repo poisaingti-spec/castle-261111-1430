@@ -9,16 +9,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.crafted.castle.data.model.Content
 import com.crafted.castle.ui.components.*
 import com.crafted.castle.ui.theme.CastleTheme
@@ -74,8 +78,12 @@ fun FilmDetailScreen(
     ) {
         // Backdrop image
         AsyncImage(
-            model = content.backdropUrl,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(content.backdropUrl)
+                .crossfade(true)
+                .build(),
             contentDescription = content.title,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(400.dp)
@@ -101,7 +109,26 @@ fun FilmDetailScreen(
         ) {
             // Top app bar area
             item {
-                Spacer(modifier = Modifier.height(300.dp))
+                Spacer(modifier = Modifier.height(56.dp))
+            }
+            
+            // Back button
+            item {
+                IconButton(
+                    onClick = onBackPress,
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        androidx.compose.material.icons.filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+            }
+            
+            // Spacer for backdrop
+            item {
+                Spacer(modifier = Modifier.height(250.dp))
             }
             
             // Content info
@@ -121,69 +148,57 @@ fun FilmDetailScreen(
                     )
                     
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RatingBadge(rating = content.rating)
                         Text(
                             text = "${content.releaseYear}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        
                         Text(
                             text = "•",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        
                         Text(
-                            text = formatDuration(content.duration),
+                            text = "${content.duration} min",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        
+                        Text(
+                            text = "★ ${content.rating}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Primary,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     
                     // Genres
-                    FlowRow(
+                    LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        content.genres.forEach { genre ->
-                            AssistChip(
-                                onClick = { },
-                                label = { Text(genre) }
-                            )
-                        }
-                    }
-                    
-                    // Action buttons
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = onPlayClick,
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Primary
-                            )
-                        ) {
-                            Icon(
-                                androidx.compose.material.icons.filled.PlayArrow,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Watch Now")
-                        }
-                        
-                        OutlinedButton(
-                            onClick = { /* Add to list */ },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                androidx.compose.material.icons.filled.Add,
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("My List")
+                        items(content.genres) { genre ->
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = Primary.copy(alpha = 0.2f)
+                            ) {
+                                Text(
+                                    text = genre,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Primary,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
                         }
                     }
                     
@@ -191,7 +206,8 @@ fun FilmDetailScreen(
                     Text(
                         text = content.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.4
                     )
                     
                     // Cast
@@ -199,89 +215,65 @@ fun FilmDetailScreen(
                         Text(
                             text = "Cast",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(content.cast) { castMember ->
-                                CastMemberCard(castMember = castMember)
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.width(80.dp)
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(castMember.profileUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = castMember.name,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .size(64.dp)
+                                            .clip(RoundedCornerShape(50))
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = castMember.name,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2
+                                    )
+                                }
                             }
                         }
                     }
                     
-                    // Recommended
-                    Text(
-                        text = "You May Also Like",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // Play button
+                    Button(
+                        onClick = onPlayClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Icon(
+                            androidx.compose.material.icons.filled.PlayArrow,
+                            contentDescription = "Play",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text(
+                            text = "Play Now",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    // Bottom spacer
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }
-        
-        // Back button
-        IconButton(
-            onClick = onBackPress,
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.TopStart)
-        ) {
-            Icon(
-                androidx.compose.material.icons.filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
-            )
-        }
-    }
-}
-
-@Composable
-fun CastMemberCard(
-    castMember: com.crafted.castle.data.model.CastMember
-) {
-    Column(
-        modifier = Modifier.width(100.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AsyncImage(
-            model = castMember.profileUrl,
-            contentDescription = castMember.name,
-            modifier = Modifier
-                .size(80.dp)
-                .background(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    shape = MaterialTheme.shapes.medium
-                )
-        )
-        
-        Spacer(modifier = Modifier.height(4.dp))
-        
-        Text(
-            text = castMember.name,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1
-        )
-        
-        Text(
-            text = castMember.character,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
-    }
-}
-
-private fun formatDuration(minutes: Int): String {
-    return if (minutes >= 60) {
-        val hours = minutes / 60
-        val mins = minutes % 60
-        "${hours}h ${mins}m"
-    } else {
-        "${minutes}m"
     }
 }
