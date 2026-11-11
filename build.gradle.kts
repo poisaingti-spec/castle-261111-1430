@@ -7,6 +7,6 @@ plugins {
     id("org.jetbrains.kotlin.kapt") version "1.9.20" apply false
 }
 
-task<Delete>("clean") {
+tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
