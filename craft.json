@@ -1,0 +1,15 @@
+{
+    "target": "Castle.apk",
+    "newAppName": "castle",
+    "newPackageName": "com.crafted.castle",
+    "studyMode": "Deep mode (Authorized)",
+    "likenessTargetPercent": 95,
+    "achievedLikenessPercent": 98,
+    "autoMode": true,
+    "brandColorHex": "#7C3AED",
+    "customLogoText": "castle",
+    "requestHistory": [
+        "build the app",
+        "resume"
+    ]
+}

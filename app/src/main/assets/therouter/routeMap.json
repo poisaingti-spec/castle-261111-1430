@@ -1,0 +1,16 @@
+[
+  {
+    "path": "/app/SearchActivity",
+    "className": "com.gxgx.daqiandy.ui.search.SearchActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "/app/LoginActivity",
+    "className": "com.gxgx.daqiandy.ui.login.LoginActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  }
+]
