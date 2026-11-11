@@ -23,13 +23,27 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../keystore/castle-release-key.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: "castle123"
+            keyAlias = System.getenv("KEY_ALIAS") ?: "castle-key"
+            keyPassword = System.getenv("KEY_PASSWORD") ?: "castle123"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     
@@ -47,7 +61,7 @@ android {
     }
     
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.6"
+        kotlinCompilerExtensionVersion = "1.5.4"
     }
     
     packaging {
